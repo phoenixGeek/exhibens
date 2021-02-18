@@ -1,0 +1,75 @@
+@media only screen and (min-width: 1600px) and (min-height: 800px){
+	.title-slider {
+		vertical-align: middle;
+		margin-top: 250px;
+	}
+	.blog{
+		background-position: bottom;
+	}
+	.btn-slider{
+		margin: 100px auto;
+	}
+	.pd-ft {
+		padding: 0 30px;
+	}
+}
+@media only screen and (max-width: 938px){
+	.margin-top-card{
+		margin-top: 0;
+	}
+}
+@media only screen and (max-width: 790px){
+	.height-card {
+		height: 185px;
+	}
+	.custom{
+		height: 700px;
+	}
+}
+@media only screen and (max-width: 501px){
+	.rp-ft{
+		padding: 25px;
+	}
+	.dp-none{
+		display: none;
+	}
+	.height-card{
+		height: auto;
+	}
+	.rp-sbs-tc{
+		text-align: center;
+	}
+	.logo-ft{
+		width: auto;
+	}
+	.custom-2{
+		background-image: url(bcdr-img/Bg-W.png);
+		text-align: center;
+	}
+	.custom{
+		height: 650px;
+	}
+}
+@media only screen and (max-width: 415px) and (max-height: 824px){
+	.hr-7 {
+		background-color: #fff;
+		margin-right: 0;
+	}
+	.title-slider {
+		vertical-align: middle;
+		margin-top: 180px;
+	}
+	.mg-rps-mb{
+		margin-bottom: 20px;
+	}
+
+}
+@media only screen and (max-width: 415px) and (max-height: 570px){
+
+	.title-slider {
+		vertical-align: middle;
+		margin-top: 40px;
+	}
+}
+
+

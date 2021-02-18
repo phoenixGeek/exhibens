@@ -1,0 +1,9 @@
+1 - Create an empty Database in MySQL and Import The SQL file.
+2 - Open Application/config/database.php and replace the DB's info : DB name, Username and password.
+3 - Open Application/config and Replace the base_url config :
+	$config['base_url'] = 'http://localhost/exhibens/';
+4 - If you run the website in a Subfolder : Please open .htaccess and replace 
+	RewriteBase /exhibens/
+
+	By your folder name :
+	RewriteBase /foldername/
