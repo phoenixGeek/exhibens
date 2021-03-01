@@ -73,12 +73,30 @@ class pa_model extends CI_Model
         return $query->result()[0];
     }
 
+    public function insertSegmentLog($data)
+    {
+        $this->db->insert("segment_logs", $data);
+        return $this->db->insert_id();
+    }
+
+    public function getPresentationByPublicURL($publicURL)
+    {
+        $query = $this->db->get_where('presentations', array('display_url' => $publicURL));
+        return $query->result()[0];
+    }
+
     public function updatePresentation($data, $pid)
     {
         $this->db->where('id', $pid);
         $this->db->update('presentations', $data);
     }
     
+    public function updateSegmentOrder($data, $segid)
+    {
+        $this->db->where('id', $segid);
+        $this->db->update('segments', $data);
+    }
+
     public function insertSegment($data)
     {
         $this->db->insert("segments",$data);
@@ -114,11 +132,40 @@ class pa_model extends CI_Model
         return $query->result();        
     }
 
+    public function getMaxSegmentOrder($pid)
+    {
+        $this->db->select_max('order');
+        $result = $this->db->get('segments')->row();  
+        return $result->order;
+    }
+
+    public function getMaxCompositeSegmentOrder($pid)
+    {
+        $this->db->select_max('order_composite');
+        $result = $this->db->get('segments')->row();  
+        return $result->order_composite;
+    }
+
     public function getSegments($pid)
     {
-        $query = $this->db->get_where("segments", array('presentation_id' => $pid));
+        $query = $this->db->order_by('order', 'ASC')->get_where("segments", array('presentation_id' => $pid));
         return $query->result();
     }
+
+    public function getCompositeSegments($pid)
+    {
+        $query = $this->db->order_by('order_composite', 'ASC')->get_where("segments", array('presentation_id' => $pid));
+        return $query->result();
+    }
+
+    public function getSegmentsLog($uid)
+    {
+        // $query = $this->db->order_by('created_on', 'ASC')->get_where("segment_logs", array('uid' => $uid));
+        $query = $this->db->get_where("segment_logs", array('uid' => $uid));
+
+        return $query->result();
+    }
+
     public function insertPresentationVideo($data)
     {
         $this->db->insert("presentation-video",$data);

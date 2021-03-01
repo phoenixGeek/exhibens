@@ -58,6 +58,17 @@
                         <label for="segment-description"><b>Description</b></label>
                         <textarea class="form-control" name="segment-description" id="segment-description" placeholder="Your segment description" rows="5" required></textarea>
                     </div>
+                    <div class="form-group">
+                        <label for="segment-type">Select a Segment Type</label>
+                        <select class="form-control" id="segment-type" name="segment-type" style="width:30%;">
+                            <option value="video">Video</option>
+                            <option value="url">URL</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="segment-url-container" style="display:none;">
+                        <label for="segment-url">Insert your segment URL</label>
+                        <input class="form-control" name="segment-url" id="segment-url" placeholder="Place your video URL"/>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pull-right" data-dismiss="modal">Close</button>        

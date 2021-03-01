@@ -285,7 +285,7 @@
               <div class="sidebar-submenu">
                 <ul>
                   <li>
-                    <a href="<?= base_url() ?>Pa_dashboard/presentations">Presentations</a>
+                    <a href="<?= base_url() ?>">Presentations</a>
                   </li>
                 </ul>
               </div>

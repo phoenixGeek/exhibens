@@ -183,58 +183,7 @@ $(document).on('click', '.add-new-video-segment', function (event) {
         updateEndTime(maxTime);
         $("#maxTime-store").val(maxTime);
 
-        $("#ex2").slider({
-            min: 0,
-            max: duration,
-            value: [0, duration],
 
-        }).on('change', function (e) {
-
-            var minVal = e.value.newValue[0] / 1000;
-            var maxVal = e.value.newValue[1] / 1000;
-            $("#maxTime-store").val(maxVal);
-            $("#minTime-store").val(minVal);
-            $(".tooltip-inner").html(format(minVal) + " - " + format(maxVal));
-            var parentWidth = $("#full-duration-display-div").width();
-            $("#full-duration-display-div .progress").css("left", (minVal / (duration / 1000)) * parentWidth + "px");
-            $("#full-duration-display-div .progress").css("width", (((maxVal - minVal) / (duration / 1000)) * parentWidth) + "px");
-
-        }).on('slideStop', function (e) {
-
-            var minVal = e.value[0] / 1000;
-            var maxVal = e.value[1] / 1000;
-
-            $(".tooltip-inner").html(format(minVal) + " - " + format(maxVal));
-            $("#maxTime-store").val(maxVal);
-            $("#minTime-store").val(minVal);
-
-            updateStartTime(minVal);
-            updateEndTime(maxVal);
-            $("#duration-segment").html(format(maxVal - minVal));
-            $("#segDur").html(format(maxVal - minVal));
-            var parentWidth = $("#full-duration-display-div").width();
-            $("#full-duration-display-div .progress").css("left", (minVal / (duration / 1000)) * parentWidth + "px");
-            $("#full-duration-display-div .progress").css("width", (((maxVal - minVal) / (duration / 1000)) * parentWidth) + "px");
-            videoElement.currentTime = e.value[0] / 1000;
-
-        }).on('slide', function (e) {
-
-            var minVal = e.value[0] / 1000;
-            var maxVal = e.value[1] / 1000;
-
-            $(".tooltip-inner").html(format(minVal) + " - " + format(maxVal));
-            $("#maxTime-store").val(maxVal);
-            $("#minTime-store").val(minVal);
-
-            updateStartTime(minVal);
-            updateEndTime(maxVal);
-            $("#duration-segment").html(format(maxVal - minVal));
-            $("#segDur").html(format(maxVal - minVal));
-            var parentWidth = $("#full-duration-display-div").width();
-            $("#full-duration-display-div .progress").css("left", (minVal / (duration / 1000)) * parentWidth + "px");
-            $("#full-duration-display-div .progress").css("width", (((maxVal - minVal) / (duration / 1000)) * parentWidth) + "px");
-            videoElement.currentTime = e.value[0] / 1000;
-        });
 
         $(".tooltip-inner").html(format(0) + " - " + format(duration / 1000));
     });
@@ -368,7 +317,6 @@ function renderPlayer(index) {
         $("#top-pl").collapse("show");
         var videoElement = $(this)[0]
         var duration = videoElement.duration * 1000;
-        $("#duration-segment1").html(format(duration / 1000));
         $("#segDur1").html(format(duration / 1000));
         $("#ex1").attr("data-slider-max", duration);
         var minTime = seg.start;
@@ -382,63 +330,6 @@ function renderPlayer(index) {
         $("#full-duration-display-div1 .progress").css("width", (((maxTime - minTime) / (duration / 1000)) * parentWidth) + "px");
         videoElement.currentTime = seg.start;
 
-        $("#ex1").slider({
-            min: 0,
-            max: duration,
-            value: [minTime * 1000, maxTime * 1000]
-        }).on('change', function (e) {
-
-            var minVal = e.value.newValue[0] / 1000;
-            var maxVal = e.value.newValue[1] / 1000;
-            $("#maxTime-store1").val(maxVal);
-            $("#minTime-store1").val(minVal);
-            $("#ex1").parent().find(".tooltip-inner").html(format(minVal) + " - " + format(maxVal));
-            var parentWidth = $("#full-duration-display-div1").width();
-            $("#full-duration-display-div1 .progress").css("left", (minVal / (duration / 1000)) * parentWidth + "px");
-            $("#full-duration-display-div1 .progress").css("width", (((maxVal - minVal) / (duration / 1000)) * parentWidth) + "px");
-
-        }).on('slideStop', function (e) {
-
-            var minVal = e.value[0] / 1000;
-            var maxVal = e.value[1] / 1000;
-            $("#ex1").parent().find(".tooltip-inner").html(format(minVal) + " - " + format(maxVal));
-            $("#maxTime-store1").val(maxVal);
-            $("#minTime-store1").val(minVal);
-            updateTopStartTime(minVal);
-            updateTopEndTime(maxVal);
-            $("#duration-segment1").html(format(maxVal - minVal));
-            $("#segDur1").html(format(maxVal - minVal));
-            var parentWidth = $("#full-duration-display-div1").width();
-            $("#full-duration-display-div1 .progress").css("left", (minVal / (duration / 1000)) * parentWidth + "px");
-            $("#full-duration-display-div1 .progress").css("width", (((maxVal - minVal) / (duration / 1000)) * parentWidth) + "px");
-            $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentDuration").html(format(maxVal - minVal));
-            $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentStart").html(format(minVal));
-            $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentEnd").html(format(maxVal));
-            videoElement.currentTime = e.value[0] / 1000;
-            var segment_index = $("#segment-index").val();
-            segment_list[segment_index].start = minVal;
-            segment_list[segment_index].end = maxVal;
-            segment_list[segment_index].duration = maxVal - minVal;
-            segment_list[segment_index].description = $("#seg-desc1").val();
-
-        }).on('slide', function (e) {
-
-            var minVal = e.value[0] / 1000;
-            var maxVal = e.value[1] / 1000;
-
-            $("#ex1").parent().find(".tooltip-inner").html(format(minVal) + " - " + format(maxVal));
-            $("#maxTime-store1").val(maxVal);
-            $("#minTime-store1").val(minVal);
-            updateTopStartTime(minVal);
-            updateTopEndTime(maxVal);
-            $("#duration-segment1").html(format(maxVal - minVal));
-            $("#segDur1").html(format(maxVal - minVal));
-            var parentWidth = $("#full-duration-display-div1").width();
-            $("#full-duration-display-div1 .progress").css("left", (minVal / (duration / 1000)) * parentWidth + "px");
-            $("#full-duration-display-div1 .progress").css("width", (((maxVal - minVal) / (duration / 1000)) * parentWidth) + "px");
-            videoElement.currentTime = e.value[0] / 1000;
-
-        });
 
         if (isFirstTimeVideoLoaded) {
             console.log("firsttime");
@@ -649,7 +540,7 @@ $("#top-pl .time-input").change(function (e) {
 
         //$("#maxTime-store1").val(maxTime);
         $("#minTime-store1").val(minTime);
-        $("#duration-segment1").html(format(maxTime - minTime));
+
         $("#segDur1").html(format(maxTime - minTime));
         var parentWidth = $("#full-duration-display-div1").width();
         $("#segment-preview1")[0].currentTime = minTime;
@@ -675,7 +566,7 @@ $("#top-pl .time-input").change(function (e) {
         $("#ex1").slider('setValue', [minTime * 1000, time * 1000]);
         maxTime = time;
         $("#maxTime-store1").val(maxTime);
-        $("#duration-segment1").html(format(maxTime - minTime));
+
         $("#segDur1").html(format(maxTime - minTime));
         var parentWidth = $("#full-duration-display-div1").width();
         $("#full-duration-display-div1 .progress").css("left", (minTime / (duration)) * parentWidth + "px");
@@ -712,10 +603,7 @@ function updateTopEndTime(time) {
 
 $("#preview-play1").click(function () {
 
-    var values = $("#ex1").slider('getValue');
-    var min = values[0];
-    var max = values[1];
-    var duration = parseInt($("#ex1").attr("data-slider-max"));
+
     var isPlaying = $(this).attr("data-playing");
     var video = $("#segment-preview1")[0];
 
@@ -753,7 +641,6 @@ $("#full-duration-display-div1 .progress").click(function (e) {
     var x = e.pageX - posX;
     var y = e.pageY - posY;
     var width = $(this).width();
-    var values = $("#ex1").slider('getValue');
     var min = values[0] / 1000;
     var max = values[1] / 1000;
     var duration = parseInt($("#ex1").attr("data-slider-max"));

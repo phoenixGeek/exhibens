@@ -58,6 +58,18 @@
     .bi::before{
       margin:3px 5px 3px 0px!important;
     }
+    .presentation-banner {
+      width: 90%;
+      display: flex;
+      justify-content: center;
+      margin-left: 5%;
+      background: azure;
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+    .presentation-banner h3{
+      margin-top: 5px;
+    }
   </style>
 
 </head>

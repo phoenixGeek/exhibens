@@ -62,3 +62,4 @@ $route['preview/(:num)'] = 'dashboard/preview/$1';
 // $route['(:any)'] = 'detail/index/$1';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = TRUE;
+$route['presentation/(:any)'] = 'presentation/index/$1';
