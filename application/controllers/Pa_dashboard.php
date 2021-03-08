@@ -436,7 +436,8 @@ class Pa_dashboard extends MY_Controller
             }
         }
         echo json_encode([
-            "success"  => $pid,
+            "success"   => $pid,
+            "tab_type"  => $_POST['tab_type']
         ]);
         die();
     }
@@ -454,7 +455,8 @@ class Pa_dashboard extends MY_Controller
             $this->pa_model->updateSegmentOrder($data, $_POST['segment_id']);
         }
         echo json_encode([
-            "success"  => $pid,
+            "success"   => $pid,
+            "tab_type"  => $_POST['tab_type']
         ]);
         die();
     }
@@ -470,7 +472,8 @@ class Pa_dashboard extends MY_Controller
             $this->pa_model->updateSegmentOrder($data, $_POST['segment_id']);
         }
         echo json_encode([
-            "success"  => $pid,
+            "success"   => $pid,
+            "tab_type"  => $_POST['tab_type']
         ]);
         die();
     }
@@ -744,6 +747,11 @@ class Pa_dashboard extends MY_Controller
                         ->filters()
                         ->synchronize();
                     $video1->filters()->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($startTime), \FFMpeg\Coordinate\TimeCode::fromSeconds($duration));
+
+                    $currentDateTime = date("Y-m-d h:i:sa");
+                    $clip_command = $currentDateTime .': '. 'ffmpeg -ss ' .$startTime. ' -i ' .$segment_path. ' -c copy -t ' .$duration. ' output.wmv';
+                    file_put_contents('./ffmpeg.log', $clip_command, FILE_APPEND | LOCK_EX);
+
                     $randStr = $this->string_generate(10);
                     $clippedFileName = 'uploads/segments/' . 'clip_' . $randStr .'.mp4';
                     array_push($clippedFileNameArr, $clippedFileName);
@@ -767,14 +775,19 @@ class Pa_dashboard extends MY_Controller
             $currentTime = $d2->format('U');
             $randStr = $this->string_generate(10);
             $previewFileName = $currentTime . '_' . $randStr .'.mp4';
-
+            $_previewFileName = 'again_' .$previewFileName;
             $video1
                 ->concat($clippedFileNameArr)
                 ->saveFromSameCodecs('uploads/' .$previewFileName, TRUE);
 
-            $baseurl = base_url();
- 
-            $filepath = base_url() . 'uploads/' .$previewFileName;
+            $mergeVideo = $this->ffmpeg->open('uploads/' .$previewFileName);
+            $_format = new FFMpeg\Format\Video\X264();
+            $_format->setAudioCodec("libmp3lame");
+            
+            $mergeVideo
+                ->save($_format, 'uploads/' .$_previewFileName);
+
+            $filepath = base_url() . 'uploads/' .$_previewFileName;
 
             $data = array(
                 "start"             => 0,

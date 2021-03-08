@@ -12,7 +12,6 @@ $(document).ready(function (e) {
     }
     if (video_list) {
 
-        console.log("video: ", video_list)
         video_list.forEach(v => {
             var thisFormData = new FormData($("#secure-frm")[0]);
             $.ajax({
@@ -24,7 +23,6 @@ $(document).ready(function (e) {
                 dataType: "json",
                 success: function (res) {
 
-                    console.log("response: ", res);
                     csrfName = res.csrfName;
                     csrfHash = res.csrfHash;
                     $(".csrftoken").attr("name", csrfName);
@@ -71,8 +69,7 @@ $("#add-video-to-queue").click(function (e) {
                 $(".csrftoken").val(csrfHash);
                 $("#slt-video-list").append(res.videoHtml);
                 video_list.splice(0, 1, res.video);
-                // video_list.push(res.video);
-                // console.log("videooooooooooooo", video_list)
+
                 $("#video-info .num-of-video").html(video_list.length);
 
                 if ($('#create-segment-from-seletected-video').is(':checked')) {
@@ -292,7 +289,6 @@ function renderPlayer(index) {
 
     $("#segment-index").val(index);
 
-    console.log("segment_list: ", segment_list)
     updateTopStartTime(seg.start);
     updateTopEndTime(seg.end);
 
@@ -332,10 +328,10 @@ function renderPlayer(index) {
 
 
         if (isFirstTimeVideoLoaded) {
-            console.log("firsttime");
+
             isFirstTimeVideoLoaded = false;
         } else {
-            console.log("Secondtime");
+
             $("#ex1").slider('setValue', [minTime * 1000, maxTime * 1000]);
         }
         $("#ex1").parent().find(".tooltip-inner").html(format(seg.start) + " - " + format(seg.end));
@@ -608,7 +604,7 @@ $("#preview-play1").click(function () {
     var video = $("#segment-preview1")[0];
 
     if (isPlaying != 1) {
-        console.log(video.currentTime);
+
         video.play();
         video.currentTime = video.currentTime;
         isPlaying = 1;
@@ -678,7 +674,7 @@ $("#publish-btn").click(function (e) {
         dataType: "json",
         data: data,
         success: function (pres_id) {
-            console.log("success", pres_id);
+
             window.location.href = base_url + "pa_dashboard/edit_presentation/" + pid;
         }
     });
@@ -696,8 +692,6 @@ $("#updateSeg-btn").click(function (e) {
 
     data[$("#csrf").attr("name")] = $("#csrf").val();
 
-    console.log("data: ", data);
-
     $.ajax({
         type: "POST",
         url: base_url + "pa_dashboard/ajax_update_segment/" + pid,
@@ -705,7 +699,7 @@ $("#updateSeg-btn").click(function (e) {
         dataType: "json",
         data: data,
         success: function (pres_id) {
-            console.log("success", pres_id);
+
             location.reload();
         }
     });
@@ -714,7 +708,7 @@ $("#updateSeg-btn").click(function (e) {
 $('#segment-type').on('change', function () {
 
     var segType = $('#segment-type').val();
-    console.log("tyoe---", segType)
+
     if (segType === 'url') {
         $('#segment-url-container').css('display', 'block')
     } else {

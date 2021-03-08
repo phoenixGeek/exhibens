@@ -160,11 +160,11 @@ let sortableComp = Sortable.create(document.getElementById('segments-for-composi
         });
 
         var data = {
-            segmentsForComp: segmentsForComp
+            segmentsForComp: segmentsForComp,
+            tab_type: "composite"
         };
         var pid = $('#updatePre-btn').attr("data-id");
 
-        console.log("here", data, pid)
         $.ajax({
             type: "POST",
             url: base_url + "pa_dashboard/update_composite_order_segment/" + pid,
@@ -173,8 +173,8 @@ let sortableComp = Sortable.create(document.getElementById('segments-for-composi
             data: data,
             success: function (res) {
                 if (res.success) {
-                    console.log("res", res);
-                    location.reload();
+
+                    window.location.href = base_url + "pa_dashboard/edit_presentation/" + pid + '?tab=' + res.tab_type
                 }
             }
         });
@@ -187,7 +187,8 @@ $('.ckb-seg-index').on('change', function () {
     var segment_id = $(this).closest('.segments-list').data('segid');
     var data = {
         existIndex: existIndex,
-        segment_id: segment_id
+        segment_id: segment_id,
+        tab_type: "selection"
     };
 
     var pid = $('#updatePre-btn').attr("data-id");
@@ -200,7 +201,8 @@ $('.ckb-seg-index').on('change', function () {
         data: data,
         success: function (res) {
             if (res.success) {
-                console.log("succcccessss");
+
+                window.location.href = base_url + "pa_dashboard/edit_presentation/" + pid + '?tab=' + res.tab_type
             }
         }
     });
@@ -210,10 +212,11 @@ $('.ckb-seg-index').on('change', function () {
 $('.ckb-seg-comp').on('change', function () {
 
     var existComposite = $(this)[0].checked;
-    var segment_id = $(this).closest('.segForCompList').data('segid');
+    var segment_id = $(this).closest('.segments-list').data('segid');
     var data = {
         existComposite: existComposite,
-        segment_id: segment_id
+        segment_id: segment_id,
+        tab_type: "selection"
     };
 
     var pid = $('#updatePre-btn').attr("data-id");
@@ -226,8 +229,8 @@ $('.ckb-seg-comp').on('change', function () {
         data: data,
         success: function (res) {
             if (res.success) {
-                console.log("succcccessss");
-                location.reload();
+
+                window.location.href = base_url + "pa_dashboard/edit_presentation/" + pid + '?tab=' + res.tab_type
             }
         }
     });
@@ -239,18 +242,14 @@ $('#preview-composite-btn').on('click', function () {
     var segmentsForComp = [];
     $('#segments-for-composite-list > .segForCompList').each((i, elm) => {
 
-        var ckb_seg_comp = elm.getElementsByClassName('ckb-seg-comp')[0];
-        if (ckb_seg_comp.checked) {
-
-            let segForComp = {
-                segment_id: $(elm).data('segid'),
-                segment_path: $(elm).data('path'),
-                segment_start: $(elm).data('start'),
-                segment_duration: $(elm).data('duration'),
-                order: i
-            };
-            segmentsForComp.push(segForComp);
-        }
+        let segForComp = {
+            segment_id: $(elm).data('segid'),
+            segment_path: $(elm).data('path'),
+            segment_start: $(elm).data('start'),
+            segment_duration: $(elm).data('duration'),
+            order: i
+        };
+        segmentsForComp.push(segForComp);
     });
     var data = {
         segmentsForComp: segmentsForComp

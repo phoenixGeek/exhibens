@@ -17,7 +17,8 @@
             <?php
                 $passDuration = 0;
                 foreach($segments as $i => $s) {
-            ?>
+            ?>  
+                <?php if($s->exist_index): ?>
                     <?php if($s->segment_url && $s->segment_url != NULL): ?>
                         <a href="<?= $s->segment_url ?>" target="_blank" class="list-group-item list-group-item-action flex-column align-items-start segment-link" data-index="<?=$i?>">
                         <div class="d-flex w-100 justify-content-between">
@@ -38,6 +39,7 @@
 
             <?php
                 $passDuration = $passDuration + $s->duration;
+                    endif;
                 }
             ?>
             </div>

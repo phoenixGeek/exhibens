@@ -13,10 +13,6 @@ class Segment extends MY_Controller
     }
     public function index($pid, $segid)
     {
-        $this->data['footer_script'] = [
-            "pa_dashboard/segment.js",
-        ];
-
         $ip = $this->input->ip_address();
         $segment = $this->pa_model->getSegmentById($pid, $segid)[0];
         $presentation = $this->pa_model->getPresentationById($pid);
@@ -35,35 +31,16 @@ class Segment extends MY_Controller
         if(!$presentation->public) {
             $this->check_login_status();
         }
-
-        $segments_added = $this->pa_model->getSegmentById($pid, $segid);
-        
-        foreach($segments_added as $s){
-            $s->duration_in_format = gmdate("H:i:s", $s->duration);
-        } 
-
-        // $body_data = array(
-        //     "videos"  => $this->pa_model->getVideoList($this->ion_auth->user()->row()->id),
-        //     "presentation_data" => $this->pa_model->getPresentationById($pid),
-        //     "videos_added" => $this->pa_model->getVideosById($pid, $segid),
-        //     "segments_added" => $segments_added
-        // );
-
-
-        
-        $body_data = array(
-            "videos_added" => $this->pa_model->getVideosById($pid, $segid),
-            "segments_added" => $this->pa_model->getSegmentById($pid, $segid),
+        $data = array(
+            "videos" => $this->pa_model->getVideosById($pid, $segid),
             "segments" => $this->pa_model->getSegmentById($pid, $segid),
             "presentation" => $presentation,
             "author" => $this->ion_auth->user($presentation->uid)->row()
         );
         
-        // var_dump($body_data);
-        // exit(1);
         $this->load->view("public-segment/header");
-        $this->load->view("public-segment/main", $body_data);
-        $this->load->view("public-segment/footer", $this->data);
+        $this->load->view("public-segment/main", $data);
+        $this->load->view("public-segment/footer");
     }
 
     public function check_login_status()

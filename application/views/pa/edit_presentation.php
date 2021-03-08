@@ -1,5 +1,5 @@
 <style>
-    #userTable {
+    .userTable {
         border-top: none !important;
     }
     #segment-url-container {
@@ -67,11 +67,11 @@
             </div>
             <div class="form-group">
                 <label for="presentation-description"><b>Description</b></label>
-                <textarea class="form-control" name="presentation-description" placeholder="Your presentation description" rows="5"><?= $presentation_data->description ?></textarea>
+                <textarea class="form-control" name="presentation-description" placeholder="Your presentation description" rows="3"><?= $presentation_data->description ?></textarea>
             </div>
             <div class="form-group">
                 <label for="presentation-banner"><b>Banner</b></label>
-                <textarea class="form-control" name="presentation-banner" placeholder="Your presentation banner" rows="5"><?= $presentation_data->banner ?></textarea>
+                <textarea class="form-control" name="presentation-banner" placeholder="Your presentation banner" rows="3"><?= $presentation_data->banner ?></textarea>
             </div>
         </form>
         <?php
@@ -90,7 +90,7 @@
         <div class="card-body">
             <div class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
             
-                <table class="table dataTable my-0" id="userTable">
+                <table class="table dataTable my-0" class="userTable">
                     <?php foreach ($segments_added as $segment) : ?>
                         <?php if($segment->is_public): ?>
                             <p class="text-primary m-0 font-weight-bold">Your Composite List</p>
@@ -128,23 +128,73 @@
         </div>
 
         <div class="card-body">
- 
+        
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="composite-tab" data-toggle="tab" href="#composite" role="tab" aria-controls="composite" aria-selected="false">Composite Sorting</a>
+                    <a class="nav-link <?= !isset($_GET['tab']) || (isset($_GET['tab']) && $_GET['tab'] == 'selection') ? 'active' : null ?>" id="selection-tab" data-toggle="tab" href="#selection" role="tab" aria-controls="selection" aria-selected="true">Segment Selections</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="index-tab" data-toggle="tab" href="#index" role="tab" aria-controls="index" aria-selected="true">Index Sorting</a>
+                    <a class="nav-link <?= isset($_GET['tab']) && $_GET['tab'] == 'index'? 'active' : null ?>" id="index-tab" data-toggle="tab" href="#index" role="tab" aria-controls="index" aria-selected="true">Index Sorting</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= isset($_GET['tab']) && $_GET['tab'] == 'composite'? 'active' : null ?>" id="composite-tab" data-toggle="tab" href="#composite" role="tab" aria-controls="composite" aria-selected="false">Composite Sorting</a>
                 </li>
             </ul>
 
             <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade" id="index" role="tabpanel" aria-labelledby="index-tab">
+                <?php 
+                    // var_dump($_GET['tab']);
+                ?>
+                <div class="tab-pane fade <?= !isset($_GET['tab']) || (isset($_GET['tab']) && $_GET['tab'] == 'selection') ? 'show active' : null ?>" id="selection" role="tabpanel" aria-labelledby="selection-tab">
                     <div class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
-                        <table class="table dataTable my-0" id="userTable">
+                        <table class="table dataTable my-0" class="userTable">
                             <thead>
                                 <tr>
-                                    <th></th>
+                                    <th>Index</th>
+                                    <th>Comp</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Date</th>
+                                    <th>Edit</th>
+                                    <th>Delete</th>
+                                    <th>Public Page</th>
+                                </tr>
+                            </thead>
+                            <tbody id="segments-selection">
+                                <?php foreach ($segments_added as $segment) : ?>
+                                    <?php if(!$segment->is_composite): ?>
+                                    <tr class="segments-list" data-segid="<?php echo $segment->id; ?>">
+                                        
+                                        <td><input type="checkbox" class="ckb-seg-index" <?= $segment->exist_index ? 'checked' : '' ?> /></td>
+                                        <td><input type="checkbox" class="ckb-seg-comp" <?= $segment->segment_url && $segment->segment_url != NULL ? 'disabled' : '' ?> <?= $segment->exist_composite ? 'checked' : '' ?>/></td>
+                                        <td><?php echo htmlspecialchars($segment->name, ENT_QUOTES, 'UTF-8'); ?></td>
+                                        <td><?php echo htmlspecialchars($segment->content, ENT_QUOTES, 'UTF-8'); ?></td>
+                                        <td><?php echo htmlspecialchars($segment->created_on, ENT_QUOTES, 'UTF-8'); ?></td>
+                                        <?php if($segment->segment_url && $segment->segment_url != NULL): ?>
+                                            <td><a href="<?=base_url()."Pa_dashboard/edit_segment_url/". $segment->presentation_id."/". $segment->id?>">Edit</a></td>
+                                        <?php else: ?>
+                                            <td><a href="<?=base_url()."Pa_dashboard/edit_segment/". $segment->presentation_id."/". $segment->id?>">Edit</a></td>
+                                        <?php endif; ?>
+                                        
+                                        <td><a href="#" data-pid="<?=$segment->presentation_id?>" data-segid="<?=$segment->id?>" class="btn-delete-segment-showmodal" data-name="<?=$segment->name?>">Delete</a></td>
+                                            <?php if($segment->segment_url && $segment->segment_url != NULL): ?>
+                                                <td><a href="<?= $segment->segment_url ?>" target="_blank">View Segment</a></td>
+                                            <?php else: ?>
+                                                <td><a href="<?=base_url()."segment/index/".$presentation_data->id . "/" .$segment->id ?>" target="_blank">View Segment</a></td>
+                                            <?php endif; ?>
+                                    </tr>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade <?= isset($_GET['tab']) && $_GET['tab'] == 'index'? 'show active' : null ?>" id="index" role="tabpanel" aria-labelledby="index-tab">
+                    <div class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
+                        <table class="table dataTable my-0" class="userTable">
+                            <thead>
+                                <tr>
                                     <th></th>
                                     <th>Name</th>
                                     <th>Description</th>
@@ -156,14 +206,13 @@
                             </thead>
                             <tbody id="segments-lists">
                                 <?php foreach ($segments_added as $segment) : ?>
-                                    <?php if(!$segment->is_composite): ?>
+                                    <?php if(!$segment->is_composite && $segment->exist_index): ?>
                                     <tr class="segments-list" data-segid="<?php echo $segment->id; ?>">
+                                        
                                         <td><i class="fa fa-fw fa-bars text-muted custom-row-side-controller-grab drag"></i></td>
-                                        <td><input type="checkbox" class="ckb-seg-index" <?= $segment->exist_index ? 'checked' : '' ?> /></td>
                                         <td><?php echo htmlspecialchars($segment->name, ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td><?php echo htmlspecialchars($segment->content, ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td><?php echo htmlspecialchars($segment->created_on, ENT_QUOTES, 'UTF-8'); ?></td>
-                                        
                                         <?php if($segment->segment_url && $segment->segment_url != NULL): ?>
                                             <td><a href="<?=base_url()."Pa_dashboard/edit_segment_url/". $segment->presentation_id."/". $segment->id?>">Edit</a></td>
                                         <?php else: ?>
@@ -184,12 +233,11 @@
                     </div>
                 </div>
                 
-                <div class="tab-pane fade show active" id="composite" role="tabpanel" aria-labelledby="composite-tab">
+                <div class="tab-pane fade <?= isset($_GET['tab']) && $_GET['tab'] == 'composite'? 'show active' : null ?>" id="composite" role="tabpanel" aria-labelledby="composite-tab">
                     <div class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
-                        <table class="table dataTable my-0" id="userTable">
+                        <table class="table dataTable my-0" class="userTable">
                             <thead>
                                 <tr>
-                                    <th></th>
                                     <th></th>
                                     <th>Name</th>
                                     <th>Description</th>
@@ -202,12 +250,11 @@
                             </thead>
                             <tbody id="segments-for-composite-list">
                                 <?php foreach ($segments_composite_added as $segment) : ?>
-                                    <?php if(!$segment->is_composite): ?>
+                                    <?php if(!$segment->is_composite && $segment->exist_composite): ?>
 
                                     <tr class="<?= $segment->segment_url && $segment->segment_url != NULL ? 'segDiabled' : 'segForCompList'?>" data-segid="<?php echo $segment->id; ?>" data-path="<?php echo $segment->path; ?>" data-start="<?php echo $segment->start; ?>" data-duration="<?php echo $segment->duration; ?>">
-
+                                        
                                         <td><i class="fa fa-fw fa-bars text-muted custom-row-side-controller-grab drag"></i></td>
-                                        <td><input type="checkbox" class="ckb-seg-comp" <?= $segment->segment_url && $segment->segment_url != NULL ? 'disabled' : '' ?> <?= $segment->exist_composite ? 'checked' : '' ?>/></td>
                                         <td><?php echo htmlspecialchars($segment->name, ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td><?php echo htmlspecialchars($segment->content, ENT_QUOTES, 'UTF-8'); ?></td>
                                         <td><?= $segment->segment_url && $segment->segment_url != NULL ? 'URL' : 'Video' ?></td>
@@ -241,7 +288,7 @@
         <div class="col-xl-12 mb-3"></div>
         <div class="col-xl-12">
             <a href="#" class="btn btn-primary pull-right" id="updatePre-btn" data-id="<?= $presentation_data->id ?>"><i class="bi bi-save2"></i>Update</a>
-            <a href="<?=base_url()."Pa_dashboard/presentations/" ?>" class="btn btn-secondary mr-2 pull-right">Back</a>
+            <a href="<?=base_url() ?>" class="btn btn-secondary mr-2 pull-right">Back</a>
         </div>
     </div>
 
@@ -362,10 +409,10 @@
                                     </tr>
                                 </thead>
 
-                                <tbody>
+                                <tbody id="segments-preview-list">
                                     <?php foreach ($segments_composite_added as $segment) : ?>
                                     <?php if(!$segment->is_composite && $segment->exist_composite): ?>
-                                        <tr>
+                                        <tr class="segments-preview" data-segid="<?php echo $segment->id; ?>" data-path="<?php echo $segment->path; ?>" data-start="<?php echo $segment->start; ?>" data-duration="<?php echo $segment->duration; ?>">
                                             <td><?php echo htmlspecialchars($segment->name, ENT_QUOTES, 'UTF-8'); ?></td>
                                             <td><?php echo htmlspecialchars($segment->content, ENT_QUOTES, 'UTF-8'); ?></td>
                                             <td><?= $segment->segment_url && $segment->segment_url != NULL ? 'URL' : 'Video' ?></td>

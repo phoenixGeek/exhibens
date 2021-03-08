@@ -4,127 +4,284 @@
 <script type="text/javascript">
     let current_url = window.location.origin + window.location.pathname;
     var base_url = "<?= base_url() ?>";
-
+    var initRenderFlag = true;
     function get_base_url(m_url) {
         return base_url + m_url;
     }
 </script>
 
-
-<script type="text/javascript">
-
-  jQuery(function($) {
-
-    $(".sidebar-dropdown > a").click(function() {
-      $(".sidebar-submenu").slideUp(200);
-      if (
-        $(this)
-        .parent()
-        .hasClass("active")
-      ) {
-        $(".sidebar-dropdown").removeClass("active");
-        $(this)
-          .parent()
-          .removeClass("active");
-      } else {
-        $(".sidebar-dropdown").removeClass("active");
-        $(this)
-          .next(".sidebar-submenu")
-          .slideDown(200);
-        $(this)
-          .parent()
-          .addClass("active");
-      }
-    });
-
-    $("#close-sidebar").click(function() {
-      $(".page-wrapper").removeClass("toggled");
-    });
-    $("#show-sidebar").click(function() {
-      $(".page-wrapper").addClass("toggled");
-    });
-
-    $(".sidebar-menu a").each((index, el) => {
-      let el_href = $(el).attr('href');
-      if (el_href == current_url) {
-        if ($(el).parents(".sidebar-submenu").length) {
-          $(el).parents('.sidebar-dropdown').addClass('active');
-          $(el).parents(".sidebar-submenu").show();
-        }
-        $(el).parents('li').addClass('active');
-      }
-    })
-
-  });
-</script>
-
-<script>
-var segment_list = [];
-var video_list = [];
-</script>
-
-<?php
-
-if(isset($videos_added) && $videos_added){
-  ?>
-  <script>
-    video_list = JSON.parse('<?=json_encode($videos_added)?>');
-    console.log("video_list: ", video_list)
-  </script>
-  <?php
-};
-
-if(isset($segments_added) && $segments_added){
-  ?>
-  <script>
-    segment_list = JSON.parse('<?=json_encode($segments_added)?>');
-    console.log("segment_list: ", segment_list)
-  </script>
-  <?php
-  }
-  ?>
-  
-<!-- Load footer scripts -->
 <?php
 if (isset($footer_script) && count($footer_script) > 0) {
-  foreach ($footer_script as $key => $script) {
-    echo "\n";
-    echo '<script type="text/javascript" src="' . base_url() . 'assets/' . $script . '?ver=' . time() . '"></script>';
-    echo "\n";
-  }
+    foreach ($footer_script as $key => $script) {
+        echo "\n";
+        echo '<script type="text/javascript" src="' . base_url() . 'assets/' . $script . '?ver=' . time() . '"></script>';
+        echo "\n";
+    }
 }
 ?>
 
-<script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
-
 <script>
-  
-  $("#preview-play").click(function(){
-    console.log("play");
-    var values = $("#ex2").slider('getValue');
-    var min = values[0];
-    var max = values[1];
-    var duration = parseInt($("#ex2").attr("data-slider-max"));
-    
-    var isPlaying = $(this).attr("data-playing");
-    console.log("min value: ", min);
-    console.log("max value: ", max);
-    console.log("duration value: ", duration);
+    class segmentVideoPlayer {
+        duration = 0;
+        segment_list = [];
+        videos = [];
+        divID = "";
+        curentIndex = 0;
+        currentTime = 0;
+        passDuration = 0;
+        inTransit = false;
+        playMode = 1;
 
-    var video = $("#segment-preview")[0];
+        constructor(divID) {
+            this.divID = divID;
+            this.curentIndex = 0;
+            var selfClass = this;
 
-    if(isPlaying != 1){
-      video.play();
-      isPlaying = 1;
-      $(this).attr("data-playing","1");
-      $(this).html("Pause");
-    } else {
-      video.pause();
-      $(this).html("Play");
-      $(this).attr("data-playing","0");
+            // document.querySelectorAll(".btn-play-media")[0].addEventListener("click", function() {
+            //   if(initRenderFlag) {
+            //     selfClass.play();
+            //   }
+            // });
+        }
+
+        addSegment(seg) {
+
+            this.segment_list.push(seg);
+            this.duration += seg.duration;
+            var video = document.createElement('video');
+            video.src = seg.path;
+            video.autoplay = false;
+            video.controls = false;
+            video.style.height = "auto";
+            video.style.width = "100%";
+            video.classList.add("mpl");
+            video.style.margin = "auto";
+            video.onloadeddata = function() {
+                video.currentTime = seg.start;
+            }
+            var selfClass = this;
+
+            video.dataset.start = seg.start;
+            video.dataset.end = seg.end;
+            if (this.segment_list.length == 1) {
+                video.style.display = "block";
+            } else {
+                video.style.display = "none";
+            }
+
+            video.onplay = function() {
+
+            }
+
+            video.ontimeupdate = function(e) {
+                var ctime = e.target.currentTime;
+                
+                if (ctime + 0.200 >= selfClass.segment_list[selfClass.curentIndex].end) {
+                    if (selfClass.curentIndex < selfClass.videos.length - 1) {
+                        e.target.pause();
+                        e.target.currentTime = selfClass.segment_list[selfClass.curentIndex].start;
+                        if(selfClass.playMode) selfClass.playNext();
+                        selfClass.inTransit = true;
+
+                        setTimeout(function() {
+                            selfClass.inTransit = false;
+                        }, 200)
+
+                    } else {
+                        e.target.pause();
+                        selfClass.currentTime = selfClass.duration;
+                        selfClass.updateChronos();
+                        selfClass.updateProgress();
+                    }
+                } else {
+                    selfClass.updateCurrentTime(e.target.currentTime - selfClass.segment_list[selfClass.curentIndex].start);
+                    if (!selfClass.inTransit) {
+                        selfClass.updateChronos();
+                        selfClass.updateProgress();
+                    }
+
+                }
+            }
+
+            video.onended = function(e) {
+                if (selfClass.curentIndex < selfClass.videos.length - 1) {
+                    selfClass.playNext();
+                }
+            }
+
+            this.videos.push(video);
+            this.updateDuration();
+            this.updateDurationText();
+
+            document.getElementById(this.divID).appendChild(video);
+        }
+
+        play() {
+
+            if (this.currentTime == this.duration) {
+                this.currentTime = 0;
+                this.passDuration = 0;
+                this.curentIndex = 0;
+                this.inTransit = false;
+                this.updateChronos();
+                this.updateProgress();
+                this.play_index(this.curentIndex);
+            } else {
+                this.play_index(this.curentIndex);
+            }
+        }
+
+        jump_to(sec) {
+            var mIndex = this.get_video_index_from_sec(sec);
+            this.passDuration = this.getSegmentTimePosition(mIndex);
+            this.curentIndex = mIndex;
+            this.currentTime = sec;
+            this.inTransit = false;
+            console.log(mIndex);
+            for (let i = 0; i < this.videos.length; i++) {
+                var v = this.videos[i];
+                if(i != mIndex) {
+                    v.style.display = "none";
+                }
+            }
+            this.videos[this.curentIndex].style.display = "block";
+            this.videos[this.curentIndex].currentTime = sec - this.passDuration + this.segment_list[this.curentIndex].start;
+            this.videos[this.curentIndex].play();
+
+            console.log(sec - this.passDuration);
+            return true;
+        }
+
+        get_video_index_from_sec(sec) {
+            var index = 0;
+
+            for (let i = 0; i < this.segment_list.length; i++) {
+                const seg = segment_list[i];
+                var mPassDuration = this.getSegmentTimePosition(i);
+                if (mPassDuration <= sec & sec <= mPassDuration + seg.end) {
+                    index = i;
+                }
+            }
+            return index;
+        }
+        continue (sec) {
+
+        }
+        play_index(index) {
+            this.curentIndex = index;
+            this.setPassDuration(this.getSegmentTimePosition(this.curentIndex));
+            for (let i = 0; i < this.videos.length; i++) {
+                var v = this.videos[i];
+                if(i != index) {
+                    v.style.display = "none";
+                }
+            }
+            this.videos[this.curentIndex].style.display = "block";
+            this.videos[this.curentIndex].currentTime = this.segment_list[this.curentIndex].start;
+            this.videos[this.curentIndex].play();
+        }
+        playNext() {
+            this.videos[this.curentIndex].style.display = "none";
+            this.curentIndex = this.curentIndex + 1;
+            this.play_index(this.curentIndex);
+            this.setPassDuration(this.getSegmentTimePosition(this.curentIndex));
+        }
+        startPlay() {
+            this.curentIndex = 0;
+            this.play_index(0);
+        }
+        getSegmentTimePosition(index) {
+            var mDuration = 0;
+            for (let j = 0; j < index; j++) {
+                const s = segment_list[j];
+                mDuration += segment_list[j].duration;
+            }
+            return mDuration
+        }
+
+        updateChronos() {
+            var el = document.getElementsByClassName("video-chronos")[0];
+            el.innerText = this.format(this.currentTime);
+        }
+        updateDuration() {
+            var d = 0;
+            for (let i = 0; i < segment_list.length; i++) {
+                const s = segment_list[i];
+                d += s.duration;
+            }
+            this.duration = d;
+        }
+        updateDurationText() {
+            document.getElementsByClassName("toal-duration")[0].innerHTML = this.format(this.duration);
+        }
+        setPassDuration(time) {
+            this.passDuration = time;
+        }
+        updateCurrentTime(time) {
+            
+            this.currentTime = this.passDuration + time;
+        }
+        updateProgress() {
+            document.getElementsByClassName("progress-bar")[0].style.width = ((this.currentTime / this.duration) * 100) + "%";
+        }
+
+
+        format(time) {
+            
+            var hrs = ~~(time / 3600);
+            var mins = ~~((time % 3600) / 60);
+            var secs = ~~time % 60;
+            var ret = "";
+            if (hrs > 0) {
+                ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+            }
+            if (mins < 10) {
+                ret += "0" + mins + ":" + (secs < 10 ? "0" : "");
+            } else {
+                ret += mins + ":" + (secs < 10 ? "0" : "");
+            }
+            ret += "" + secs;
+            return ret;
+        }
+
     }
-    
-  });
+    let mSegmentPlayer = new segmentVideoPlayer("player-wrapper");
+</script>
+<script>
+    jQuery(document).ready(function() {
+        
+        for (let i = 0; i < segment_list.length; i++) {
+            var seg = segment_list[i];
+            seg.start = parseFloat(seg.start);
+            seg.end = parseFloat(seg.end);
+            seg.duration = parseFloat(seg.duration);
+            mSegmentPlayer.addSegment(seg);
+        }
+
+        jQuery("#player-wrapper").show();
+
+    });
+    jQuery(".btn-play-media").click(function() {
+
+      var media = document.querySelector('.mpl');
+      if(initRenderFlag) {
+        mSegmentPlayer.play();
+      } else {
+        if(!mSegmentPlayer.playMode) {
+          media.pause();
+        } else {
+          media.play();
+        }
+      }
+
+      initRenderFlag = false;
+      mSegmentPlayer.playMode = !mSegmentPlayer.playMode
+      media.onended = function(e) {
+        console.log("ended")
+        mSegmentPlayer.play();
+      };
+    });
+
 </script>
 </body>
 
