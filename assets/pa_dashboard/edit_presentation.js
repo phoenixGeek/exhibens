@@ -128,7 +128,7 @@ $("#add-video-to-queue").click(function (e) {
 
         $("#add-video-modal").modal("hide");
         $(".video-slt").prop('checked', false);
-
+        $(".transition-setting").show();
     });
 });
 
@@ -779,10 +779,16 @@ $("#publish-btn").click(function (e) {
         title: $("input[name='presentation-name']").val(),
         description: $("textarea[name='presentation-description']").val(),
         videos: video_list,
-        segments: segment_list
+        segments: segment_list,
+        tran_in_duration: $("#transition_in_duration").val(),
+        tran_out_duration: $("#transition_out_duration").val(),
+        tran_in_type: $('#type_for_transition_in').find(":selected").val(),
+        tran_out_type: $('#type_for_transition_out').find(":selected").val()
     };
 
     data[$("#csrf").attr("name")] = $("#csrf").val();
+
+    console.log("data----->", data)
 
     $.ajax({
         type: "POST",
@@ -804,7 +810,11 @@ $("#updateSeg-btn").click(function (e) {
         title: $("input[name='presentation-name']").val(),
         description: $("textarea[name='presentation-description']").val(),
         videos: video_list,
-        segments: segment_list
+        segments: segment_list,
+        tran_in_duration: $("#transition_in_duration").val(),
+        tran_out_duration: $("#transition_out_duration").val(),
+        tran_in_type: $('#type_for_transition_in').find(":selected").val(),
+        tran_out_type: $('#type_for_transition_out').find(":selected").val()
     };
 
     data[$("#csrf").attr("name")] = $("#csrf").val();

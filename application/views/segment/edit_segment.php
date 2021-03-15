@@ -4,6 +4,11 @@
         top: -20px;
         right: 40px
     }
+    
+    .transition-setting {
+        position: relative;
+        top: -15px;
+    }
 </style>
 
 <div class="container">    
@@ -60,8 +65,41 @@
             <div id="slt-video-list" class="mt-4 mb-4"></div>
         </div>
     </div>
-    <a href="#" class="btn btn-primary pull-right" id="updateSeg-btn" data-id="<?= $presentation_data->id ?>"><i class="bi bi-save"></i>Update</a>
 
+    <div class="transition-setting">
+        <h4>Transition Settings</h4>
+        <div class="row">
+            <div class="col-xs-6 col-sm-6 col-lg-6">
+                <div class="form-group">
+                    <label>Duration of Transition In</label>
+                    <input type="number" class="form-control" name="transition_in_duration" id="transition_in_duration">
+                </div>
+                <div class="form-group">
+                    <label>Type of Transition In</label>
+                    
+                    <select class="form-control" name="type_for_transition_in" id="type_for_transition_in">
+                        <option value="fade_in">Fade In</option>
+                        <option value="fade_out">Fade Out</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xs-6 col-sm-6 col-lg-6">
+                <div class="form-group">
+                    <label>Duration of Transition Out</label>
+                    <input type="number" class="form-control" name="transition_out_duration" id="transition_out_duration">
+                </div>
+                <div class="form-group">
+                    <label>Type of Transition Out</label>
+                    <select class="form-control" name="type_for_transition_out" id="type_for_transition_out">
+                        <option value="fade_out">Fade Out</option>
+                        <option value="fade_in">Fade In</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="#" class="btn btn-primary pull-right" id="updateSeg-btn" data-id="<?= $presentation_data->id ?>"><i class="bi bi-save"></i>Update</a>
 </div>
 
 <!-- Modal -->

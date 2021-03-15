@@ -49,7 +49,11 @@ if (isset($footer_script) && count($footer_script) > 0) {
             this.segment_list.push(seg);
             this.duration += seg.duration;
             var video = document.createElement('video');
-            video.src = seg.path;
+            if(seg.fade_path) {
+                video.src = seg.fade_path;
+            } else {
+                video.src = seg.path
+            }
             video.autoplay = false;
             video.controls = false;
             video.style.height = "auto";
@@ -250,10 +254,16 @@ if (isset($footer_script) && count($footer_script) > 0) {
 <script>
     jQuery(document).ready(function() {
         
+        console.log("list: ", segment_list)
         for (let i = 0; i < segment_list.length; i++) {
             var seg = segment_list[i];
-            seg.start = parseFloat(seg.start);
-            seg.end = parseFloat(seg.end);
+            if(seg.fade_path) {
+                seg.start = 0;
+                seg.end = parseFloat(seg.duration);
+            } else {
+                seg.start = parseFloat(seg.start);
+                seg.end = parseFloat(seg.end);
+            }
             seg.duration = parseFloat(seg.duration);
             mSegmentPlayer.addSegment(seg);
         }
@@ -278,7 +288,7 @@ if (isset($footer_script) && count($footer_script) > 0) {
       mSegmentPlayer.playMode = !mSegmentPlayer.playMode
       media.onended = function(e) {
         console.log("ended")
-        mSegmentPlayer.play();
+        // mSegmentPlayer.play();
       };
     });
 

@@ -1,1 +1,0 @@
-2021-03-08 05:39:51am: ffmpeg -ss 2.295 -i http://localhost/exhibens/uploads/382166c7391f0307f2a234e7732121ef.mp4 -c copy -t 9.449 output.wmv

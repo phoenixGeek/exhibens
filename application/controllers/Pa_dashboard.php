@@ -42,7 +42,7 @@ class Pa_dashboard extends MY_Controller
             redirect('signin', 'refresh');
         } else {
 
-            $this->c_user   = $this->ion_auth->user()->row();
+            $this->c_user = $this->ion_auth->user()->row();
             $this->c_user->thumb = '';
             if (!empty($this->c_user->avatar)) {
                 $full_file_path = $this->c_user->avatar;
@@ -621,6 +621,14 @@ class Pa_dashboard extends MY_Controller
 
     public function ajax_save_segment($pid)
     {
+
+        $dir = 'ffmpeglogs';
+        $root_dir = realpath(__DIR__ . '/../..') .'/';
+
+        if( is_dir($root_dir .$dir) === false ) {
+            mkdir($root_dir .$dir);
+        }
+
         $title = $this->input->post("title");
         $description = $this->input->post("description");
         $videos = $this->input->post("videos");
@@ -641,16 +649,93 @@ class Pa_dashboard extends MY_Controller
                 "segid" => $segid
             ));
         }
+        
+        $format=new \FFMpeg\Format\Video\X264('libmp3lame', 'libx264'); 
+        $format->setAdditionalParameters( [ '-crf', '29' ] )->setKiloBitrate(1000);
+        $format->setAudioCodec("libmp3lame");
+
+        $startTime = (float) $segments[1]["start"];
+        $duration = (float) $segments[1]["duration"];
+        $endTime = (float) $segments[1]["end"];
+        $segment_path = $segments[1]["path"];
+
+
+        $_video = $this->ffmpeg->open($segment_path);
+        $_video
+            ->filters()
+            ->synchronize();
+        $_video->filters()->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($startTime), \FFMpeg\Coordinate\TimeCode::fromSeconds($duration));
+
+        $clip_currentDateTime = date("Y-m-d h:i:sa");
+        $clip_command = $clip_currentDateTime .' : '. 'C:\ffmpeg\bin\ffmpeg.exe -ss ' .$startTime. ' -i ' .$segment_path. ' -c copy -t ' .$duration. ' output.wmv';
+
+        file_put_contents('ffmpeglogs/ffmpeg.log', $clip_command .'------- Function Name: ajax_save_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+
+        $randStr = $this->string_generate(10);
+        $clippedFileName = 'uploads/segments/'. $this->c_user->username . '/clip_' . $randStr .'.mp4';
+        $_video->save($format, $clippedFileName);
+
+        if ($_POST['tran_in_duration'] && $_POST['tran_in_type'] && $_POST['tran_out_duration'] && $_POST['tran_out_type']) {
+            
+            $tran_in_duration = (float) $_POST['tran_in_duration'];
+            $tran_out_duration = (float) $_POST['tran_out_duration'];
+            $_randStr = $this->string_generate(10);
+            $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
+    
+            $startTimeFade = $duration - $tran_out_duration;
+            $root_path = getcwd();
+            $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=' .$tran_in_duration .',fade=type=out:duration='. $tran_out_duration .':start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
+            $output1 = shell_exec($fade_cmd);
+            $fade_currentDateTime = date("Y-m-d h:i:sa");
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+    
+            $filepath = base_url() .$fadeFileName;
+
+        } else if ($_POST['tran_in_duration'] && !$_POST['tran_out_duration']) {
+            
+            $tran_in_duration = (float) $_POST['tran_in_duration'];
+            $_randStr = $this->string_generate(10);
+            $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
+    
+            $startTimeFade = $duration;
+            $root_path = getcwd();
+            $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=' .$tran_in_duration .',fade=type=out:duration=0:start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
+            $output1 = shell_exec($fade_cmd);
+            $fade_currentDateTime = date("Y-m-d h:i:sa");
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+    
+            $filepath = base_url() .$fadeFileName;
+
+        } else if ($_POST['tran_out_duration'] && !$_POST['tran_in_duration']) {
+
+            $tran_out_duration = (float) $_POST['tran_out_duration'];
+            $_randStr = $this->string_generate(10);
+            $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
+    
+            $startTimeFade = $duration - $tran_out_duration;
+            $root_path = getcwd();
+            $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=0,fade=type=out:duration=' .$startTimeFade .':start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
+            $output1 = shell_exec($fade_cmd);
+            $fade_currentDateTime = date("Y-m-d h:i:sa");
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+    
+            $filepath = base_url() .$fadeFileName;
+        
+        } else {
+
+            $filepath = '';
+        }
 
         $data = array(
-            "name" => $title,
-            "content" => $description,
-            "start" => $segments[1]["start"],
-            "end" => $segments[1]["end"],
-            "videoid" => $segments[1]["video_id"],
-            "path" => $segments[1]["path"],
-            "duration" => $segments[1]["duration"],
-            "presentation_id" => $pid            
+            "name"              => $title,
+            "content"           => $description,
+            "start"             => $segments[1]["start"],
+            "end"               => $segments[1]["end"],
+            "videoid"           => $segments[1]["video_id"],
+            "path"              => $segments[1]["path"],
+            "duration"          => $segments[1]["duration"],
+            "presentation_id"   => $pid,
+            "fade_path"         => $filepath
         );
         $this->pa_model->updateSegment($data, $segid);
 
@@ -660,6 +745,13 @@ class Pa_dashboard extends MY_Controller
 
     public function ajax_update_segment($pid)
     {
+        $dir = 'ffmpeglogs';
+        $root_dir = realpath(__DIR__ . '/../..') .'/';
+
+        if( is_dir($root_dir .$dir) === false ) {
+            mkdir($root_dir .$dir);
+        }
+
         $title = $this->input->post("title");
         $description = $this->input->post("description");
         $videos = $this->input->post("videos");
@@ -681,15 +773,91 @@ class Pa_dashboard extends MY_Controller
             ));
         }
 
+        $format=new \FFMpeg\Format\Video\X264('libmp3lame', 'libx264'); 
+        $format->setAdditionalParameters( [ '-crf', '29' ] )->setKiloBitrate(1000);
+        $format->setAudioCodec("libmp3lame");
+
+        $startTime = (float) $segments[0]["start"];
+        $duration = (float) $segments[0]["duration"];
+        $endTime = (float) $segments[0]["end"];
+        $segment_path = $segments[0]["path"];
+
+        $_video = $this->ffmpeg->open($segment_path);
+        $_video
+            ->filters()
+            ->synchronize();
+        $_video->filters()->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($startTime), \FFMpeg\Coordinate\TimeCode::fromSeconds($duration));
+
+        $clip_currentDateTime = date("Y-m-d h:i:sa");
+        $clip_command = $clip_currentDateTime .' : '. 'C:\ffmpeg\bin\ffmpeg.exe -ss ' .$startTime. ' -i ' .$segment_path. ' -c copy -t ' .$duration. ' output.wmv';
+
+        file_put_contents('ffmpeglogs/ffmpeg.log', $clip_command .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+
+        $randStr = $this->string_generate(10);
+        $clippedFileName = 'uploads/segments/'. $this->c_user->username . '/clip_' . $randStr .'.mp4';
+        $_video->save($format, $clippedFileName);
+
+        if ($_POST['tran_in_duration'] && $_POST['tran_in_type'] && $_POST['tran_out_duration'] && $_POST['tran_out_type']) {
+            
+            $tran_in_duration = (float) $_POST['tran_in_duration'];
+            $tran_out_duration = (float) $_POST['tran_out_duration'];
+            $_randStr = $this->string_generate(10);
+            $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
+    
+            $startTimeFade = $duration - $tran_out_duration;
+            $root_path = getcwd();
+            $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=' .$tran_in_duration .',fade=type=out:duration='. $tran_out_duration .':start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
+            $output1 = shell_exec($fade_cmd);
+            $fade_currentDateTime = date("Y-m-d h:i:sa");
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+    
+            $filepath = base_url() .$fadeFileName;
+
+        } else if ($_POST['tran_in_duration'] && !$_POST['tran_out_duration']) {
+            
+            $tran_in_duration = (float) $_POST['tran_in_duration'];
+            $_randStr = $this->string_generate(10);
+            $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
+    
+            $startTimeFade = $duration;
+            $root_path = getcwd();
+            $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=' .$tran_in_duration .',fade=type=out:duration=0:start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
+            $output1 = shell_exec($fade_cmd);
+            $fade_currentDateTime = date("Y-m-d h:i:sa");
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+    
+            $filepath = base_url() .$fadeFileName;
+
+        } else if ($_POST['tran_out_duration'] && !$_POST['tran_in_duration']) {
+
+            $tran_out_duration = (float) $_POST['tran_out_duration'];
+            $_randStr = $this->string_generate(10);
+            $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
+    
+            $startTimeFade = $duration - $tran_out_duration;
+            $root_path = getcwd();
+            $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=0,fade=type=out:duration=' .$startTimeFade .':start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
+            $output1 = shell_exec($fade_cmd);
+            $fade_currentDateTime = date("Y-m-d h:i:sa");
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+    
+            $filepath = base_url() .$fadeFileName;
+        
+        } else {
+
+            $filepath = '';
+        }
+
         $data = array(
-            "name" => $title,
-            "content" => $description,
-            "start" => $segments[0]["start"],
-            "end" => $segments[0]["end"],
-            "videoid" => $segments[0]["videoid"],
-            "path" => $segments[0]["path"],
-            "duration" => $segments[0]["duration"],
-            "presentation_id" => $pid            
+            "name"              => $title,
+            "content"           => $description,
+            "start"             => $segments[0]["start"],
+            "end"               => $segments[0]["end"],
+            "videoid"           => $segments[0]["videoid"],
+            "path"              => $segments[0]["path"],
+            "duration"          => $segments[0]["duration"],
+            "presentation_id"   => $pid,
+            "fade_path"         => $filepath
         );
         $this->pa_model->updateSegment($data, $segid);
 
@@ -726,6 +894,13 @@ class Pa_dashboard extends MY_Controller
 
     public function preview_composite($pid)
     {
+        $dir = 'ffmpeglogs';
+        $root_dir = realpath(__DIR__ . '/../..') .'/';
+
+        if( is_dir($root_dir .$dir) === false ) {
+            mkdir($root_dir .$dir);
+        }
+
         if(isset($_POST['segmentsForComp']) && is_array($_POST['segmentsForComp'])) {
 
             $format=new \FFMpeg\Format\Video\X264('libmp3lame', 'libx264'); 
@@ -748,13 +923,15 @@ class Pa_dashboard extends MY_Controller
                         ->synchronize();
                     $video1->filters()->clip(\FFMpeg\Coordinate\TimeCode::fromSeconds($startTime), \FFMpeg\Coordinate\TimeCode::fromSeconds($duration));
 
-                    $currentDateTime = date("Y-m-d h:i:sa");
-                    $clip_command = $currentDateTime .': '. 'ffmpeg -ss ' .$startTime. ' -i ' .$segment_path. ' -c copy -t ' .$duration. ' output.wmv';
-                    file_put_contents('./ffmpeg.log', $clip_command, FILE_APPEND | LOCK_EX);
-
                     $randStr = $this->string_generate(10);
                     $clippedFileName = 'uploads/segments/' . 'clip_' . $randStr .'.mp4';
                     array_push($clippedFileNameArr, $clippedFileName);
+
+                    $currentDateTime = date("Y-m-d h:i:sa");
+                    $clip_command = $currentDateTime .' : '. 'C:\ffmpeg\bin\ffmpeg.exe -ss ' .$startTime. ' -i ' .$segment_path. ' -c copy -t ' .$duration. $clippedFileName;
+                    file_put_contents('ffmpeglogs/ffmpeg.log', $clip_command .'------- Function Name: preview_composite.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+
+
                     $video1->save($format, $clippedFileName);
                 } else {
                     $video = $this->ffmpeg->open($segment_path);

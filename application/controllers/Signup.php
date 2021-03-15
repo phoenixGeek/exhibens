@@ -30,7 +30,7 @@ class Signup extends CI_Controller
         if ($this->form_validation->run() === TRUE) {
             
             $email = $this->input->post("email");
-            $username = $email;
+            $username = explode("@", $email)[0];
             $password = $this->input->post("password");
             $uid = $this->ion_auth->register($username, $password, $email);
 
