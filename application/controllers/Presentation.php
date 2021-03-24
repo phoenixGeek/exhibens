@@ -24,7 +24,8 @@ class Presentation extends MY_Controller
             $data = array(
                 "segments" => $this->pa_model->getSegments($pid),
                 "presentation" => $presentation,
-                "author" => $this->ion_auth->user($presentation->uid)->row()
+                "author" => $this->ion_auth->user($presentation->uid)->row(),
+                "segsForComp"   => $this->pa_model->getSegmentsForComp($pid)
             );
         } else {
             $presentation = $this->pa_model->getPresentationByPublicURL($pid);
@@ -34,7 +35,8 @@ class Presentation extends MY_Controller
             $data = array(
                 "segments" => $this->pa_model->getSegments($presentation->id),
                 "presentation" => $presentation,
-                "author" => $this->ion_auth->user($presentation->uid)->row()
+                "author" => $this->ion_auth->user($presentation->uid)->row(),
+                "segsForComp"   => $this->pa_model->getSegmentsForComp($pid)
             );
         }
 

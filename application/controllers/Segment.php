@@ -32,10 +32,11 @@ class Segment extends MY_Controller
             $this->check_login_status();
         }
         $data = array(
-            "videos" => $this->pa_model->getVideosById($pid, $segid),
-            "segments" => $this->pa_model->getSegmentById($pid, $segid),
-            "presentation" => $presentation,
-            "author" => $this->ion_auth->user($presentation->uid)->row()
+            "videos"        => $this->pa_model->getVideosById($pid, $segid),
+            "segments"      => $this->pa_model->getSegmentById($pid, $segid),
+            "presentation"  => $presentation,
+            "author"        => $this->ion_auth->user($presentation->uid)->row(),
+            "segsForComp"   => $this->pa_model->getSegmentsForComp($pid)
         );
         
         $this->load->view("public-segment/header");

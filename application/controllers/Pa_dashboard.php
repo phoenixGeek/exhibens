@@ -411,7 +411,7 @@ class Pa_dashboard extends MY_Controller
                 $segment['segment_id'] = (int) $segment['segment_id'];
                 $segment['order'] = (int) $segment['order'];
                 $data = array(
-                    "order" => $segment['order'] + 1,
+                    "order_index" => $segment['order'] + 1,
                 );
                 $this->pa_model->updateSegmentOrder($data, $segment['segment_id']);
             }
@@ -508,7 +508,7 @@ class Pa_dashboard extends MY_Controller
                 "name"              => $segment_name,
                 "content"           => $segment_description,
                 "presentation_id"   => $pid,
-                "order"             => $max_segment_order + 1,
+                "order_index"             => $max_segment_order + 1,
                 "order_composite"   => $max_segment_order + 1,
                 "uid"               =>  $this->ion_auth->user()->row()->id,
                 "exist_index"       => 1
@@ -521,7 +521,7 @@ class Pa_dashboard extends MY_Controller
                 "content"           => $segment_description,
                 "presentation_id"   => $pid,
                 "segment_url"       => $segment_url,
-                "order"             => $max_segment_order + 1,
+                "order_index"             => $max_segment_order + 1,
                 "order_composite"   => $max_segment_order + 1,
                 "uid"               =>  $this->ion_auth->user()->row()->id,
                 "exist_index"       => 1
@@ -673,11 +673,12 @@ class Pa_dashboard extends MY_Controller
 
         $randStr = $this->string_generate(10);
         $clippedFileName = 'uploads/segments/'. $this->c_user->username . '/clip_' . $randStr .'.mp4';
+        $clippedFilePath = base_url() .$clippedFileName;
         $_video->save($format, $clippedFileName);
 
         if ($_POST['tran_in_duration'] && $_POST['tran_in_type'] && $_POST['tran_out_duration'] && $_POST['tran_out_type']) {
             
-            $tran_in_duration = (float) $_POST['tran_in_duration'];
+            $tran_in_duration = (float) $_POST['tran_in_duration'] + 2;
             $tran_out_duration = (float) $_POST['tran_out_duration'];
             $_randStr = $this->string_generate(10);
             $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
@@ -687,13 +688,13 @@ class Pa_dashboard extends MY_Controller
             $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=' .$tran_in_duration .',fade=type=out:duration='. $tran_out_duration .':start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
             $output1 = shell_exec($fade_cmd);
             $fade_currentDateTime = date("Y-m-d h:i:sa");
-            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_save_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
     
             $filepath = base_url() .$fadeFileName;
 
         } else if ($_POST['tran_in_duration'] && !$_POST['tran_out_duration']) {
             
-            $tran_in_duration = (float) $_POST['tran_in_duration'];
+            $tran_in_duration = (float) $_POST['tran_in_duration'] + 2;
             $_randStr = $this->string_generate(10);
             $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
     
@@ -702,7 +703,7 @@ class Pa_dashboard extends MY_Controller
             $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=' .$tran_in_duration .',fade=type=out:duration=0:start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
             $output1 = shell_exec($fade_cmd);
             $fade_currentDateTime = date("Y-m-d h:i:sa");
-            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_save_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
     
             $filepath = base_url() .$fadeFileName;
 
@@ -717,7 +718,7 @@ class Pa_dashboard extends MY_Controller
             $fade_cmd = 'C:\ffmpeg\bin\ffmpeg.exe -i ' .$root_path .'/' .$clippedFileName.' -vf "fade=type=in:duration=0,fade=type=out:duration=' .$startTimeFade .':start_time="' .$startTimeFade .' -c:a copy ' .$root_path .'/' .$fadeFileName;
             $output1 = shell_exec($fade_cmd);
             $fade_currentDateTime = date("Y-m-d h:i:sa");
-            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_update_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
+            file_put_contents('ffmpeglogs/ffmpeg.log', $fade_currentDateTime .' : ' .$fade_cmd .'------- Function Name: ajax_save_segment.' .PHP_EOL, FILE_APPEND | LOCK_EX);
     
             $filepath = base_url() .$fadeFileName;
         
@@ -727,15 +728,20 @@ class Pa_dashboard extends MY_Controller
         }
 
         $data = array(
-            "name"              => $title,
-            "content"           => $description,
-            "start"             => $segments[1]["start"],
-            "end"               => $segments[1]["end"],
-            "videoid"           => $segments[1]["video_id"],
-            "path"              => $segments[1]["path"],
-            "duration"          => $segments[1]["duration"],
-            "presentation_id"   => $pid,
-            "fade_path"         => $filepath
+            "name"                      => $title,
+            "content"                   => $description,
+            "start"                     => $segments[1]["start"],
+            "end"                       => $segments[1]["end"],
+            "videoid"                   => $segments[1]["video_id"],
+            "path"                      => $segments[1]["path"],
+            "duration"                  => $segments[1]["duration"],
+            "presentation_id"           => $pid,
+            "fade_path"                 => $filepath,
+            "segment_path"              => $clippedFilePath,
+            "transition_in_type"        => $_POST['tran_in_type'],
+            "transition_out_type"       => $_POST['tran_out_type'],
+            "transition_in_duration"    => $_POST['tran_in_duration'],
+            "transition_out_duration"   => $_POST['tran_out_duration']
         );
         $this->pa_model->updateSegment($data, $segid);
 
@@ -795,11 +801,12 @@ class Pa_dashboard extends MY_Controller
 
         $randStr = $this->string_generate(10);
         $clippedFileName = 'uploads/segments/'. $this->c_user->username . '/clip_' . $randStr .'.mp4';
+        $clippedFilePath = base_url() .$clippedFileName;
         $_video->save($format, $clippedFileName);
 
         if ($_POST['tran_in_duration'] && $_POST['tran_in_type'] && $_POST['tran_out_duration'] && $_POST['tran_out_type']) {
             
-            $tran_in_duration = (float) $_POST['tran_in_duration'];
+            $tran_in_duration = (float) $_POST['tran_in_duration'] + 2;
             $tran_out_duration = (float) $_POST['tran_out_duration'];
             $_randStr = $this->string_generate(10);
             $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
@@ -815,7 +822,7 @@ class Pa_dashboard extends MY_Controller
 
         } else if ($_POST['tran_in_duration'] && !$_POST['tran_out_duration']) {
             
-            $tran_in_duration = (float) $_POST['tran_in_duration'];
+            $tran_in_duration = (float) $_POST['tran_in_duration'] + 2;
             $_randStr = $this->string_generate(10);
             $fadeFileName = 'uploads/segments/'. $this->c_user->username . '/fade_' . $_randStr .'.mp4';
     
@@ -849,15 +856,20 @@ class Pa_dashboard extends MY_Controller
         }
 
         $data = array(
-            "name"              => $title,
-            "content"           => $description,
-            "start"             => $segments[0]["start"],
-            "end"               => $segments[0]["end"],
-            "videoid"           => $segments[0]["videoid"],
-            "path"              => $segments[0]["path"],
-            "duration"          => $segments[0]["duration"],
-            "presentation_id"   => $pid,
-            "fade_path"         => $filepath
+            "name"                      => $title,
+            "content"                   => $description,
+            "start"                     => $segments[0]["start"],
+            "end"                       => $segments[0]["end"],
+            "videoid"                   => $segments[0]["videoid"],
+            "path"                      => $segments[0]["path"],
+            "duration"                  => $segments[0]["duration"],
+            "presentation_id"           => $pid,
+            "fade_path"                 => $filepath,
+            "segment_path"              => $clippedFilePath,
+            "transition_in_type"        => $_POST['tran_in_type'],
+            "transition_out_type"       => $_POST['tran_out_type'],
+            "transition_in_duration"    => $_POST['tran_in_duration'],
+            "transition_out_duration"   => $_POST['tran_out_duration']
         );
         $this->pa_model->updateSegment($data, $segid);
 
@@ -955,16 +967,16 @@ class Pa_dashboard extends MY_Controller
             $_previewFileName = 'again_' .$previewFileName;
             $video1
                 ->concat($clippedFileNameArr)
-                ->saveFromSameCodecs('uploads/' .$previewFileName, TRUE);
+                ->saveFromSameCodecs('uploads/segments/' .$previewFileName, TRUE);
 
-            $mergeVideo = $this->ffmpeg->open('uploads/' .$previewFileName);
+            $mergeVideo = $this->ffmpeg->open('uploads/segments/' .$previewFileName);
             $_format = new FFMpeg\Format\Video\X264();
             $_format->setAudioCodec("libmp3lame");
             
             $mergeVideo
-                ->save($_format, 'uploads/' .$_previewFileName);
+                ->save($_format, 'uploads/segments/' .$_previewFileName);
 
-            $filepath = base_url() . 'uploads/' .$_previewFileName;
+            $filepath = base_url() . 'uploads/segments/' .$_previewFileName;
 
             $data = array(
                 "start"             => 0,

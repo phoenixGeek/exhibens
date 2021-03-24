@@ -132,11 +132,17 @@ class pa_model extends CI_Model
         return $query->result();        
     }
 
+    public function getSegmentsForComp($pid)
+    {
+        $query = $this->db->get_where("segments", array('presentation_id' => $pid, 'exist_composite' => 1));
+        return $query->result();  
+    }
+
     public function getMaxSegmentOrder($pid)
     {
-        $this->db->select_max('order');
+        $this->db->select_max('order_index');
         $result = $this->db->get('segments')->row();  
-        return $result->order;
+        return $result->order_index;
     }
 
     public function getMaxCompositeSegmentOrder($pid)
@@ -148,7 +154,7 @@ class pa_model extends CI_Model
 
     public function getSegments($pid)
     {
-        $query = $this->db->order_by('order', 'ASC')->get_where("segments", array('presentation_id' => $pid));
+        $query = $this->db->order_by('order_index', 'ASC')->get_where("segments", array('presentation_id' => $pid));
         return $query->result();
     }
 

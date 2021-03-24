@@ -101,7 +101,7 @@
                                     <th>Public Page</th>
                                 </tr>
                             </thead>
-                        <?php endif; ?>
+                        <?php break; endif; ?>
                     <?php endforeach; ?>
                     <tbody id="segment-composite-lists">
                         <?php foreach ($segments_added as $segment) : ?>

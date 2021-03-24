@@ -12,7 +12,6 @@ $(document).ready(function (e) {
     }
     if (video_list) {
 
-        console.log("video: ", video_list)
         video_list.forEach(v => {
             var thisFormData = new FormData($("#secure-frm")[0]);
             $.ajax({
@@ -24,7 +23,6 @@ $(document).ready(function (e) {
                 dataType: "json",
                 success: function (res) {
 
-                    console.log("response: ", res);
                     csrfName = res.csrfName;
                     csrfHash = res.csrfHash;
                     $(".csrftoken").attr("name", csrfName);
@@ -72,7 +70,7 @@ $("#add-video-to-queue").click(function (e) {
                 $("#slt-video-list").append(res.videoHtml);
                 video_list.splice(0, 1, res.video);
                 // video_list.push(res.video);
-                // console.log("videooooooooooooo", video_list)
+
                 $("#video-info .num-of-video").html(video_list.length);
 
                 if ($('#create-segment-from-seletected-video').is(':checked')) {
@@ -83,7 +81,7 @@ $("#add-video-to-queue").click(function (e) {
                         "vid_duration": res.video.duration,
                         "end": res.video.duration,
                         "duration": res.video.duration,
-                        "duration_in_format": format(res.video.duration),
+                        // "duration_in_format": format(res.video.duration),
                         "video_id": res.video.vid,
                         "path": base_url + res.video.path,
                         "description": "",
@@ -289,7 +287,7 @@ $("#add-segment-to-presentation").click(function (e) {
                     "start": minTime,
                     "end": maxTime,
                     "duration": maxTime - minTime,
-                    "duration_in_format": format(maxTime - minTime),
+                    // "duration_in_format": format(maxTime - minTime),
                     "video_id": self.attr('data-vid'),
                     "path": $("#segment-preview").attr("src"),
                     "description": $("#seg-desc").val(),
@@ -343,7 +341,6 @@ function renderPlayer(index) {
 
     $("#segment-index").val(index);
 
-    console.log("segment_list: ", segment_list)
     updateTopStartTime(seg.start);
     updateTopEndTime(seg.end);
 
@@ -368,8 +365,8 @@ function renderPlayer(index) {
         $("#top-pl").collapse("show");
         var videoElement = $(this)[0]
         var duration = videoElement.duration * 1000;
-        $("#duration-segment1").html(format(duration / 1000));
-        $("#segDur1").html(format(duration / 1000));
+        // $("#duration-segment1").html(format(duration / 1000));
+        // $("#segDur1").html(format(duration / 1000));
         $("#ex1").attr("data-slider-max", duration);
         var minTime = seg.start;
         var maxTime = seg.end;
@@ -406,7 +403,9 @@ function renderPlayer(index) {
             $("#minTime-store1").val(minVal);
             updateTopStartTime(minVal);
             updateTopEndTime(maxVal);
-            $("#duration-segment1").html(format(maxVal - minVal));
+            $('#seg-duration').val(maxVal - minVal);
+            console.log("22222")
+            // $("#duration-segment1").html(format(maxVal - minVal));
             $("#segDur1").html(format(maxVal - minVal));
             var parentWidth = $("#full-duration-display-div1").width();
             $("#full-duration-display-div1 .progress").css("left", (minVal / (duration / 1000)) * parentWidth + "px");
@@ -431,7 +430,9 @@ function renderPlayer(index) {
             $("#minTime-store1").val(minVal);
             updateTopStartTime(minVal);
             updateTopEndTime(maxVal);
-            $("#duration-segment1").html(format(maxVal - minVal));
+            $('#seg-duration').val(maxVal - minVal);
+            console.log("333")
+            // $("#duration-segment1").html(format(maxVal - minVal));
             $("#segDur1").html(format(maxVal - minVal));
             var parentWidth = $("#full-duration-display-div1").width();
             $("#full-duration-display-div1 .progress").css("left", (minVal / (duration / 1000)) * parentWidth + "px");
@@ -441,7 +442,7 @@ function renderPlayer(index) {
         });
 
         if (isFirstTimeVideoLoaded) {
-            console.log("firsttime");
+
             isFirstTimeVideoLoaded = false;
         } else {
             console.log("Secondtime");
@@ -503,26 +504,27 @@ function updateSegmentList(segment) {
 
 function updateSegmentListDiv() {
 
-    $("#segment-list").empty();
-    var htmlCode = "";
-    var indexTblHTML = "";
-    var currentDuration = 0;
+    // console.log("wooow wonderful!!")
+    // $("#segment-list").empty();
+    // var htmlCode = "";
+    // var indexTblHTML = "";
+    // var currentDuration = 0;
 
-    for (let i = 0; i < segment_list.length; i++) {
+    // for (let i = 0; i < segment_list.length; i++) {
 
-        const e = segment_list[i];
-        htmlCode += '<div class="list-group-item d-flex align-items-center justify-content-between"  data-id="' + i + '" data-segment-id="' + e.segment_id + '" data-array-index="' + i + '" >';
-        htmlCode += '<div>';
-        htmlCode += '<p class="mb-0 d-inline-flex align-items-center">';
-        htmlCode += 'Segment #' + (i + 1).toString() + " - <b>Duration</b> : " + '<span class="segmentDuration">' + e.duration_in_format + '</span>' + ' - <b>Start</b> : <span class="segmentStart">' + format(e.start) + '</span> - <b>End</b> : <span class="segmentEnd">' + format(e.end) + '</span>';
-        htmlCode += '</p>';
-        htmlCode += '</div>';
-        htmlCode += '</div>';
-        currentDuration += segment_list[i].duration;
-    }
+    //     const e = segment_list[i];
+    //     htmlCode += '<div class="list-group-item d-flex align-items-center justify-content-between"  data-id="' + i + '" data-segment-id="' + e.segment_id + '" data-array-index="' + i + '" >';
+    //     htmlCode += '<div>';
+    //     htmlCode += '<p class="mb-0 d-inline-flex align-items-center">';
+    //     htmlCode += 'Segment #' + (i + 1).toString() + " - <b>Duration</b> : " + '<span class="segmentDuration">' + e.duration_in_format + '</span>' + ' - <b>Start</b> : <span class="segmentStart">' + format(e.start) + '</span> - <b>End</b> : <span class="segmentEnd">' + format(e.end) + '</span>';
+    //     htmlCode += '</p>';
+    //     htmlCode += '</div>';
+    //     htmlCode += '</div>';
+    //     currentDuration += segment_list[i].duration;
+    // }
 
-    $("#segment-list").append(htmlCode);
-    $(".input-wrapper").append(indexTblHTML);
+    // $("#segment-list").append(htmlCode);
+    // $(".input-wrapper").append(indexTblHTML);
 }
 
 function findVideoInListByID(vid) {
@@ -634,7 +636,7 @@ $("#top-pl .time-input").change(function (e) {
     var s = parseInt(els[2].value);
     var ms = parseInt(els[3].value);
     var time = getTimefromInput(h, m, s, ms);
-    var duration = $("#segment-preview")[0].duration;
+    var duration = parseFloat($("#seg-duration").val());
 
     if (lbl == "start") {
 
@@ -646,7 +648,6 @@ $("#top-pl .time-input").change(function (e) {
 
         $("#ex1").slider('setValue', [time * 1000, maxTime * 1000]);
         minTime = time;
-
         //$("#maxTime-store1").val(maxTime);
         $("#minTime-store1").val(minTime);
         $("#duration-segment1").html(format(maxTime - minTime));
@@ -665,17 +666,19 @@ $("#top-pl .time-input").change(function (e) {
         $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentStart").html(format(minTime));
         $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentEnd").html(format(maxTime));
 
-    } else {
+    } else if (lbl == "end") {
+        console.log("duration end");
+
         //kiem tra gia tri max
         if (time < 0) time = 0;
         if (time > duration) time = duration;
-
         //can update o day
         var minTime = $("#minTime-store1").val();
         $("#ex1").slider('setValue', [minTime * 1000, time * 1000]);
         maxTime = time;
         $("#maxTime-store1").val(maxTime);
-        $("#duration-segment1").html(format(maxTime - minTime));
+        $('#seg-duration').val(duration);
+        // $("#duration-segment1").html(format(maxTime - minTime));
         $("#segDur1").html(format(maxTime - minTime));
         var parentWidth = $("#full-duration-display-div1").width();
         $("#full-duration-display-div1 .progress").css("left", (minTime / (duration)) * parentWidth + "px");
@@ -689,7 +692,38 @@ $("#top-pl .time-input").change(function (e) {
         $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentDuration").html(format(maxTime - minTime));
         $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentStart").html(format(minTime));
         $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentEnd").html(format(maxTime));
+    } else if (lbl == "duration") {
+
+        // debugger;
+
+        //kiem tra gia tri max
+        console.log("here duration time: ", time, duration)
+        if (time < 0) time = 0;
+        if (time > duration) time = duration;
+        //can update o day
+        var minTime = parseFloat($("#minTime-store1").val());
+        $("#ex1").slider('setValue', [minTime * 1000, time * 1000]);
+        maxTime = minTime + duration;
+        console.log("max: ", minTime, duration, maxTime)
+        $("#maxTime-store1").val(maxTime);
+        $('#seg-duration').val(duration);
+        // $("#duration-segment1").html(format(maxTime - minTime));
+        $("#segDur1").html(format(maxTime - minTime));
+        var parentWidth = $("#full-duration-display-div1").width();
+        $("#full-duration-display-div1 .progress").css("left", (minTime / (duration)) * parentWidth + "px");
+        $("#full-duration-display-div1 .progress").css("width", (((maxTime - minTime) / (duration)) * parentWidth) + "px");
+        $("#ex1").parent().find(".tooltip-inner").html(format(minTime) + " - " + format(maxTime));
+        $("#full-duration-display-div1 .progress .progress-bar").width("0%");
+
+
+        segment_list[segment_index].end = maxTime;
+        segment_list[segment_index].description = $("#seg-desc1").val();
+        segment_list[segment_index].duration = maxTime - minTime;
+        $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentDuration").html(format(maxTime - minTime));
+        $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentStart").html(format(minTime));
+        $("#segment-list .list-group-item:nth-child(" + (activeSegment + 1) + ") .segmentEnd").html(format(maxTime));
     }
+
     $("#ex1").parent().find(".tooltip-inner").html(format(minTime) + " - " + format(maxTime));
 
 });
@@ -720,7 +754,7 @@ $("#preview-play1").click(function () {
     var video = $("#segment-preview1")[0];
 
     if (isPlaying != 1) {
-        console.log(video.currentTime);
+
         video.play();
         video.currentTime = video.currentTime;
         isPlaying = 1;
@@ -788,8 +822,6 @@ $("#publish-btn").click(function (e) {
 
     data[$("#csrf").attr("name")] = $("#csrf").val();
 
-    console.log("data----->", data)
-
     $.ajax({
         type: "POST",
         url: base_url + "pa_dashboard/ajax_save_segment/" + pid,
@@ -797,7 +829,7 @@ $("#publish-btn").click(function (e) {
         dataType: "json",
         data: data,
         success: function (pres_id) {
-            console.log("success", pres_id);
+
             window.location.href = base_url + "pa_dashboard/edit_presentation/" + pid;
         }
     });
@@ -805,6 +837,7 @@ $("#publish-btn").click(function (e) {
 
 $("#updateSeg-btn").click(function (e) {
 
+    console.log("@@@@@", segment_list)
     var pid = $(this).attr("data-id");
     var data = {
         title: $("input[name='presentation-name']").val(),
@@ -837,7 +870,7 @@ $("#updateSeg-btn").click(function (e) {
 $('#segment-type').on('change', function () {
 
     var segType = $('#segment-type').val();
-    console.log("tyoe---", segType)
+
     if (segType === 'url') {
         $('#segment-url-container').css('display', 'block')
     } else {

@@ -4,29 +4,65 @@
 
 <div class="container jumbotron">
     <h1 class="display-4"><?=$presentation->title?></h1>
-    <div id="player-wrapper">                        
-        <div id="player-controls">
-            <div class="buttons-control mb-1">
-                <a href="#" class="btn-play-media control"><i class="bi bi-play-btn"></i></a>
-                <span>
-                    <span class="video-chronos">00:00</span> / <span class="toal-duration">00:00</span>
-                </span>
-            </div>
-            
-            <div class="progress" style="height: 3px;">
-                <div class="progress-bar" role="progressbar"  style="width: 0%;"  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>            
-        </div> 
+    <?php
+        if( $segments[0]->is_composite ) {
+            $videoSrc = $segments[0]->path;
+        } else if ( $segments[0]->fade_path ) {
+            $videoSrc = $segments[0]->fade_path;
+        } else if ( $segments[0]->segment_path ) {
+            $videoSrc = $segments[0]->segment_path;
+        }
+    ?>
+    <div id="player-wrapper">
+        <video width="100%" controls autoplay>
+            <source src="<?= $videoSrc ?>" type="video/mp4">
+        </video>
     </div>
 
     <div>
         <br />
         <p class="lead"><?=$presentation->description?></p>
         <hr class="my-4">
-        <p>Posted by <b><?=$author->first_name ." ".$author->first_name ?></b> at  <i><?=$presentation->created_on?></i></p>
+        <p>Posted by <b><?=$author->first_name ?></b> at  <i><?=$presentation->created_on?></i></p>
         <h3 class="lead">Video segments :</h3>
         <div class="row">
             <div class="list-group col-md-6">
+
+                <?php if($segments[0]->is_composite): ?>
+                <div class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
+                    <table class="table dataTable my-0" class="userTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Public Page</th>
+                            </tr>
+                        </thead>
+                        <tbody id="segments-selection">
+                            <?php foreach ($segsForComp as $segment) : ?>
+                                <?php if(!$segment->is_composite): ?>
+                                <tr class="segments-list" data-segid="<?php echo $segment->id; ?>">
+                                    
+                                    <td><?php echo htmlspecialchars($segment->name, ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($segment->created_on, ENT_QUOTES, 'UTF-8'); ?></td>
+                   
+                                    
+                        
+                                    <?php if($segment->segment_url && $segment->segment_url != NULL): ?>
+                                        <td><a href="<?= $segment->segment_url ?>" target="_blank">View Segment</a></td>
+                                    <?php else: ?>
+                                        <td><a href="<?=base_url()."segment/index/".$segment->presentation_id . "/" .$segment->id ?>" target="_blank">View Segment</a></td>
+                                    <?php endif; ?>
+                                </tr>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+
+
+
             <?php
             
             $passDuration = 0;

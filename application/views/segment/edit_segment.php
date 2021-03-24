@@ -4,10 +4,16 @@
         top: -20px;
         right: 40px
     }
-    
     .transition-setting {
         position: relative;
         top: -15px;
+    }
+    .used-transition {
+        position: relative;
+        top: 4em;
+    }
+    .used-transition ul{
+        font-size: 1.6em;
     }
 </style>
 
@@ -36,10 +42,11 @@
     
         <div class="col-md-12"><video id="segment-preview1" style="width:100%;height:auto;" poster="<?=base_url().'assets/pa_dashboard/sample-player.png'?>"></video></div>
         <div class="col-md-3">
-            <button id="preview-play1" data-playing="0" class="btn btn-primary">Play</button> <span class="ml-2"id="segchronos1">00</span> / <span id="segDur1">00</span>
+            <button id="preview-play1" data-playing="0" class="btn btn-primary">Play</button> <span class="ml-2"id="segchronos1">00</span> / <span id="segDur1"><?= $segments_added[0]->duration?></span>
         </div>
         <div class="col-md-9 text-right">
-            <b>Duration</b> : <span id="duration-segment1"></span>
+            <b>Duration</b> : <span id="duration-segment1" data-lbl="duration"> :<input class="time-input" type="hidden" id="start-hour1" min="0" value="00"> <input class="time-input" type="hidden"  min="0" max="60" id="start-minute1" value="00"> <input class="time-input" type="number" id="seg-duration" value="<?= $segments_added[0]->duration?>">.<input class="time-input" type="hidden" id="start-msecond"  min="0" max="999" value="000"></span>
+            
             <b class="ml-3">Start</b> : <span id="start-segment1" data-lbl="start"><input class="time-input" type="hidden" id="start-hour1" min="0" value="00"> : <input class="time-input" type="number"  min="0" max="60" id="start-minute1" value="00"> : <input class="time-input" type="number" id="start-second1"  min="0" max="60" value="00">.<input class="time-input" type="number" id="start-msecond"  min="0" max="999" value="000"></span>
             <b class="ml-3">End</b> : <span id="end-segment1" data-lbl="end"><input class="time-input" type="hidden" id="end-hour1" value="00"  min="0"> : <input class="time-input" type="number" id="end-minute1" min="0" max="60" value="00"> : <input class="time-input" type="number" id="end-second"  min="0" max="60" value="00">.<input class="time-input" type="number" id="end-msecond1"   min="0" max="999" value="000"></span>
         </div>
@@ -61,8 +68,17 @@
     <div class="row">
         <div class="col-xl-12 mb-3"></div>
         <div class="col-xl-9">
-        <p class="mb-4"><h2 class="pull-left"><?= $segments_added[0]->name?></h2><a href="#" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#add-video-modal" style="margin-left:35%;"><i class="bi bi-file-play"></i> Select another Video</a><a href="#" data-toggle="modal" class="pull-right" data-target="#upload-modal"><i>Upload a new video</i></a></p>
+            <p class="mb-4"><h2 class="pull-left"><?= $segments_added[0]->name?></h2><a href="#" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#add-video-modal" style="margin-left:35%;"><i class="bi bi-file-play"></i> Select another Video</a><a href="#" data-toggle="modal" class="pull-right" data-target="#upload-modal"><i>Upload a new video</i></a></p>
             <div id="slt-video-list" class="mt-4 mb-4"></div>
+        </div>
+        <div class="col-xl-3 used-transition">
+            <?php if($segments_added[0]->fade_path) :?>
+                <h4>Used Transition</h4>
+                <ul>
+                    <li><?= $segments_added[0]->transition_in_type?> : <?= $segments_added[0]->transition_in_duration?></li>
+                    <li><?= $segments_added[0]->transition_out_type?> : <?= $segments_added[0]->transition_out_duration?></li>
+                </ul>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -72,12 +88,12 @@
             <div class="col-xs-6 col-sm-6 col-lg-6">
                 <div class="form-group">
                     <label>Duration of Transition In</label>
-                    <input type="number" class="form-control" name="transition_in_duration" id="transition_in_duration">
+                    <input type="number" class="form-control" name="transition_in_duration" id="transition_in_duration" value="<?= $segments_added[0]->transition_in_duration?>">
                 </div>
                 <div class="form-group">
                     <label>Type of Transition In</label>
                     
-                    <select class="form-control" name="type_for_transition_in" id="type_for_transition_in">
+                    <select class="form-control" name="type_for_transition_in" id="type_for_transition_in" value="<?= $segments_added[0]->transition_in_type?>">
                         <option value="fade_in">Fade In</option>
                         <option value="fade_out">Fade Out</option>
                     </select>
@@ -86,11 +102,11 @@
             <div class="col-xs-6 col-sm-6 col-lg-6">
                 <div class="form-group">
                     <label>Duration of Transition Out</label>
-                    <input type="number" class="form-control" name="transition_out_duration" id="transition_out_duration">
+                    <input type="number" class="form-control" name="transition_out_duration" id="transition_out_duration" value="<?= $segments_added[0]->transition_out_duration?>">
                 </div>
                 <div class="form-group">
                     <label>Type of Transition Out</label>
-                    <select class="form-control" name="type_for_transition_out" id="type_for_transition_out">
+                    <select class="form-control" name="type_for_transition_out" id="type_for_transition_out" value="<?= $segments_added[0]->transition_out_type?>">
                         <option value="fade_out">Fade Out</option>
                         <option value="fade_in">Fade In</option>
                     </select>

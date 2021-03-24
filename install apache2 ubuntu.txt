@@ -1,0 +1,45 @@
+Install apache2: 
+	sudo apt-get install apache2 libapache2-mod-php
+
+Start apache2 server:
+	sudo service apache2 start
+
+sudo apt-get update
+
+sudo apt install php  : if php is not installed
+
+Install MySQL: 
+
+sudo apt-get install mysql-server mysql-client
+sudo mysql_secure_installation
+
+Install PHPmyadmin:
+
+sudo apt-get install phpmyadmin
+
+sudo -H nano /etc/apache2/apache2.conf
+
+Include /etc/phpmyadmin/apache.conf
+
+/etc/init.d/apache2 restart
+
+cd /
+cd var
+cd www
+cd html
+
+sudo mkdir exhibens
+cp exhibens.zip var/www/html
+
+
+
+
+Hello. I am a professional Full-stack developer. I am very familiar with Node, Express, React/redux, Google API integration, google cloud, API building and integration. I am eager to recommend good ideas and solutions to the project. I can get started for you asap and can work full time. 
+Please refer to these sites which bring good ideas to you: 
+https://cloudes.one
+https://www.moneyminx.com
+
+Thanks in advance
+Emilien B
+
+
